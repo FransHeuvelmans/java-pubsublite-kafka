@@ -134,7 +134,6 @@ class SingleSubscriptionConsumerImpl implements SingleSubscriptionConsumer {
     try {
       ImmutableList.Builder<ApiFuture<Void>> stopSleepingSignals = ImmutableList.builder();
       try (CloseableMonitor.Hold h = monitor.enter()) {
-        stopSleepingSignals.add(wakeupTriggered);
         stopSleepingSignals.add(assignmentChanged);
         partitions.values().forEach(subscriber -> stopSleepingSignals.add(subscriber.onData()));
       }
@@ -142,6 +141,7 @@ class SingleSubscriptionConsumerImpl implements SingleSubscriptionConsumer {
         ApiFuturesExtensions.whenFirstDone(stopSleepingSignals.build())
             .get(duration.toMillis(), MILLISECONDS);
       } catch (TimeoutException e) {
+        if (wakeupTriggered.isDone()) throw new WakeupException();
         return ImmutableMap.of();
       }
       try (CloseableMonitor.Hold h = monitor.enter()) {

@@ -284,7 +284,7 @@ public class SingleSubscriptionConsumerImplTest {
               consumer.wakeup();
               return SettableApiFuture.create();
             });
-    assertThrows(WakeupException.class, () -> consumer.poll(Duration.ofDays(1)));
+    assertThrows(WakeupException.class, () -> consumer.poll(Duration.ofSeconds(1)));
   }
 
   @Test
